@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-runner-2
+spec:
+  containers:
+  - image: localhost:5000/linsun/myapp-data:latest
+    name: myapp-data
+    lifecycle:
+      postStart:
+        exec:
+          command:
+            - "cp"
+            - "/droplet.tgz"
+            - "/app"
+    volumeMounts:
+    - mountPath: /app
+      name: app-volume
+  - image: localhost:5000/default/k8s-runner:latest
+    name: k8s-runner
+    env:
+      - name: STARTCMD
+        value: "npm start"
+      - name: ENVVARS
+        value: "HOST=0.0.0.0"
+      - name: PORT
+        value: "8080"
+    volumeMounts:
+    - mountPath: /app/droplet
+      name: app-volume
+  volumes:
+  - name: app-volume
+    emptyDir: {}

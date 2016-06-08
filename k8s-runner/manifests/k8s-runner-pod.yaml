@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-runner
+spec:
+  restartPolicy: Never
+  containers:
+    - name: k8s-runner
+      imagePullPolicy: Always
+      image: localhost:5000/default/k8s-runner:latest
+      env:
+        - name: STARTCMD
+          value: "npm start"
+        - name: ENVVARS
+          value: "HOST=0.0.0.0"
+      volumeMounts:
+        - mountPath: /app/droplet
+          name: droplet
+  volumes:
+    - name: droplet
+      hostPath:
+        path: /tmp/spaces/test1/app_guid

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dockerbuilder
+spec:
+  restartPolicy: Never
+  containers:
+    - name: dockerbuilder
+      imagePullPolicy: Always
+      image: localhost:5000/default/dockerbuilder:latest
+      env:
+        - name: TAR_PATH
+          value: /app/droplet.tgz
+        - name: IMG_NAME
+          value: my_app_guid2
+        - name: BUILDER_STORAGE
+          value: swift
+        - name: SPACE_UUID
+          value: test1
+        - name: APP_GUID
+          value: my_app_guid
+      volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-socket
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
