@@ -1,0 +1,77 @@
+#!/usr/bin/ruby
+
+require 'digest'
+require 'json'
+require 'net/http'
+require 'openssl'
+require 'tempfile'
+
+def connect(uri)
+  http = Net::HTTP.new(uri.host, uri.port)
+  if uri.scheme == "https"
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
+  http
+end
+
+def download(dl)
+  puts "======> Downloading #{dl['to']} from #{dl['from']}"
+  temp = Tempfile.new('temp')
+  File.open(temp.path, "wb") do |file|
+    uri = URI(dl['from'])
+    response = connect(uri).get(uri.request_uri) { |str| file.write(str) }
+    response.value
+  end
+
+  FileUtils.mkdir_p(dl['to'])
+  if dl['from'].end_with? ".tgz"
+    %x"tar xfz #{temp.path} -C #{dl['to']}"
+  else
+    %x"unzip -q -d #{dl['to']} #{temp.path}"
+  end
+end
+
+def upload(ul)
+  puts "======> Uploading #{ul['from']} to #{ul['to']}"
+  body = File.read(ul['from'])
+  header = {"Content-Type" => "application/octet-stream",
+            "Content-MD5"  => Digest::MD5.base64digest(body)}
+  uri = URI(ul['to'])
+  response = connect(uri).post(uri.request_uri, body, header)
+  response.value
+end
+
+# -------------------------------------------------------------------------
+
+begin
+  # Read task definition from stager
+  task = JSON.parse(STDIN.read)
+
+  actions = task['action']['timeout']['action']['serial']['actions']
+
+  # Download app package
+  download(actions[0]['download'])
+
+  # Download buildpack_app_lifecycle and buildpacks
+  task['cached_dependencies'].each { |dl| download(dl) }
+
+  # XXX Download artifacts cache
+
+  # Run the "builder"
+  run = actions[1]['emit_progress']['action']['run']
+  run['env'].each { |e| ENV[e['name']] = e['value'] }
+  puts %x"#{run['path']} #{run['args'].join(' ')} "
+  puts "Exit status #{$?.exitstatus}"
+  exit if $?.exitstatus > 0
+
+  # Upload droplet
+  upload(actions[2]['emit_progress']['action']['parallel']['actions'][0]['upload'])
+
+  # XXX Upload artifacts cache
+rescue
+  puts "Something went wrong: #{$!}"
+end
+
+puts "--- The End ---"
+

@@ -1,0 +1,284 @@
+{
+  "rootfs": "preloaded:cflinuxfs2",
+  "env": [
+    {
+      "name": "LANG",
+      "value": "en_US.UTF-8"
+    }
+  ],
+  "action": {
+    "timeout": {
+      "action": {
+        "serial": {
+          "actions": [
+            {
+              "download": {
+                "artifact": "app package",
+                "from": "https://blobstore/read/cc-packages/27/3b/273b4ea1-c0b9-4a7c-bd3b-5275150cad19?md5=xBdw6A01zE4GucEykMLw1w&expires=1465495532",
+                "to": "/tmp/app",
+                "cache_key": "",
+                "user": "vcap"
+              }
+            },
+            {
+              "emit_progress": {
+                "action": {
+                  "run": {
+                    "path": "/tmp/lifecycle/builder",
+                    "args": [
+                      "-buildArtifactsCacheDir=/tmp/cache",
+                      "-buildDir=/tmp/app",
+                      "-buildpackOrder=ba031dee-c426-4a5a-b34d-9bd25b959f6b_8b683c2237056089dea24a2a4d70606e8a4a67cf,88a486f0-946c-4aa7-a221-90e816781d3a_483c35cf7cc87e2ebb05b2b49ebd1f3223105ec8,cd4f2c0e-4a16-4366-ac30-b0e9ee1bf75a_f5446238d598246474e97f7aea1e8389b26b6a58,222bccc3-7924-4e06-9696-d0015ea35bb6_ddfaa3b5c17aba2d9303306fb1fbae9aa2574b74,88d8d58e-9031-45de-b91c-9f5895a9115f_5dc19602391fb2571b217d754dd7652e6c76630f,b28cce64-88ee-46a0-9b06-a0590834604e_ca60152b78be3f93067cd4f03d01e2db810ac2a8,e08c45d3-e81f-46a7-b5f1-ee2b9b08f4b4_de0d8945a76c3b1206e16509e8a03e50437a5a68,c13e759a-c480-48fd-991a-bdd76ef6be83_a32d9ae40371d557c7c90eb2affc3d7bba6abe69,71c5badc-9cd5-49f5-b0d5-b1beae072a06_9915aef123b0452d8f586152cbc7594564a09888",
+                      "-buildpacksDir=/tmp/buildpacks",
+                      "-outputBuildArtifactsCache=/tmp/output-cache",
+                      "-outputDroplet=/tmp/droplet",
+                      "-outputMetadata=/tmp/result.json",
+                      "-skipCertVerify=true",
+                      "-skipDetect=false"
+                    ],
+                    "env": [
+                      {
+                        "name": "http_proxy",
+                        "value": ""
+                      },
+                      {
+                        "name": "HTTP_PROXY",
+                        "value": ""
+                      },
+                      {
+                        "name": "https_proxy",
+                        "value": ""
+                      },
+                      {
+                        "name": "HTTPS_PROXY",
+                        "value": ""
+                      },
+                      {
+                        "name": "no_proxy",
+                        "value": ".hcf,127.0.0.1"
+                      },
+                      {
+                        "name": "NO_PROXY",
+                        "value": ".hcf,127.0.0.1"
+                      },
+                      {
+                        "name": "VCAP_APPLICATION",
+                        "value": "{\"limits\":{\"fds\":16384,\"mem\":1024,\"disk\":1024},\"application_name\":\"node-env\",\"application_uris\":[\"node-env.192.168.77.77.nip.io\"],\"name\":\"node-env\",\"space_name\":\"myspace\",\"space_id\":\"0948b6c2-b845-43ef-ae5b-51d753d5cfc7\",\"uris\":[\"node-env.192.168.77.77.nip.io\"],\"version\":\"059cc28f-21e2-4e5a-88c1-cff3a3a3fa34\",\"application_version\":\"059cc28f-21e2-4e5a-88c1-cff3a3a3fa34\",\"application_id\":\"273b4ea1-c0b9-4a7c-bd3b-5275150cad19\"}"
+                      },
+                      {
+                        "name": "MEMORY_LIMIT",
+                        "value": "1024m"
+                      },
+                      {
+                        "name": "VCAP_SERVICES",
+                        "value": "{}"
+                      },
+                      {
+                        "name": "CF_STACK",
+                        "value": "cflinuxfs2"
+                      },
+                      {
+                        "name": "CF_BUILDPACKS",
+                        "value": "[{\"Name\":\"staticfile_buildpack\",\"Path\":\"/tmp/buildpacks/588c1402935aa679c160b49b085f54b1\"},{\"Name\":\"java_buildpack\",\"Path\":\"/tmp/buildpacks/69ecaa9a648c654a4a3d32b5ef4b8a0f\"},{\"Name\":\"ruby_buildpack\",\"Path\":\"/tmp/buildpacks/5aa85ca3055846b01f0aba277f697ee1\"},{\"Name\":\"nodejs_buildpack\",\"Path\":\"/tmp/buildpacks/34c85bcb69fcac4d7a063e572bdb64bd\"},{\"Name\":\"go_buildpack\",\"Path\":\"/tmp/buildpacks/0524faff499ba4ce40802e55cf8a3595\"},{\"Name\":\"python_buildpack\",\"Path\":\"/tmp/buildpacks/ea05fe10834adba9e82355932776ef8a\"},{\"Name\":\"php_buildpack\",\"Path\":\"/tmp/buildpacks/5fe273d8465d59fd255d689f30c72168\"},{\"Name\":\"binary_buildpack\",\"Path\":\"/tmp/buildpacks/5b575531eee808782c1ba318cc11dcdf\"},{\"Name\":\"cf_iis_buildpack\",\"Path\":\"/tmp/buildpacks/b053537fd6bb74cf7810ea61fc66d602\"}]"
+                      }
+                    ],
+                    "resource_limits": {
+                      "nofile": 16384
+                    },
+                    "user": "vcap",
+                    "suppress_log_output": false
+                  }
+                },
+                "start_message": "Staging...",
+                "success_message": "Staging complete",
+                "failure_message_prefix": "Staging failed"
+              }
+            },
+            {
+              "emit_progress": {
+                "action": {
+                  "parallel": {
+                    "actions": [
+                      {
+                        "upload": {
+                          "artifact": "droplet",
+                          "from": "/tmp/droplet",
+                          "to": "http://diego-cc-bridge:9090/v1/droplet/273b4ea1-c0b9-4a7c-bd3b-5275150cad19?cc-droplet-upload-uri=http%3A%2F%2Fusername%3Apassword%40api%3A9022%2Fstaging%2Fdroplets%2F273b4ea1-c0b9-4a7c-bd3b-5275150cad19%2Fupload&timeout=900",
+                          "user": "vcap"
+                        }
+                      },
+                      {
+                        "try": {
+                          "action": {
+                            "upload": {
+                              "artifact": "build artifacts cache",
+                              "from": "/tmp/output-cache",
+                              "to": "http://diego-cc-bridge:9090/v1/build_artifacts/273b4ea1-c0b9-4a7c-bd3b-5275150cad19?cc-build-artifacts-upload-uri=http%3A%2F%2Fusername%3Apassword%40api%3A9022%2Fstaging%2Fbuildpack_cache%2F273b4ea1-c0b9-4a7c-bd3b-5275150cad19%2Fupload&timeout=900",
+                              "user": "vcap"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "start_message": "Uploading droplet, build artifacts cache...",
+                "success_message": "Uploading complete",
+                "failure_message_prefix": "Uploading failed"
+              }
+            }
+          ]
+        }
+      },
+      "timeout": 900000000000
+    }
+  },
+  "disk_mb": 6144,
+  "memory_mb": 1024,
+  "cpu_weight": 50,
+  "privileged": true,
+  "log_source": "STG",
+  "log_guid": "273b4ea1-c0b9-4a7c-bd3b-5275150cad19",
+  "metrics_guid": "",
+  "result_file": "/tmp/result.json",
+  "completion_callback_url": "http://diego-cc-bridge:8888/v1/staging/273b4ea1-c0b9-4a7c-bd3b-5275150cad19-7617e252827a4676a1fa71ae123ded3b/completed",
+  "annotation": "{\"lifecycle\":\"buildpack\",\"completion_callback\":\"http://internal_user:internal_password@api:9022/internal/staging/273b4ea1-c0b9-4a7c-bd3b-5275150cad19-7617e252827a4676a1fa71ae123ded3b/completed\"}",
+  "egress_rules": [
+    {
+      "protocol": "all",
+      "destinations": [
+        "0.0.0.0-9.255.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "11.0.0.0-169.253.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "169.255.0.0-172.15.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "172.32.0.0-192.167.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "192.169.0.0-255.255.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "172.20.10.0/24"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "tcp",
+      "destinations": [
+        "0.0.0.0/0"
+      ],
+      "ports": [
+        53
+      ],
+      "log": false
+    },
+    {
+      "protocol": "udp",
+      "destinations": [
+        "0.0.0.0/0"
+      ],
+      "ports": [
+        53
+      ],
+      "log": false
+    }
+  ],
+  "cached_dependencies": [
+    {
+      "name": "",
+      "from": "http://diego-access:8080/v1/static/buildpack_app_lifecycle/buildpack_app_lifecycle.tgz",
+      "to": "/tmp/lifecycle",
+      "cache_key": "buildpack-cflinuxfs2-lifecycle",
+      "log_source": ""
+    },
+    {
+      "name": "staticfile_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/ba/03/ba031dee-c426-4a5a-b34d-9bd25b959f6b_8b683c2237056089dea24a2a4d70606e8a4a67cf?md5=n780_2zlR7HEqmHCuV0v2w&expires=1465495532",
+      "to": "/tmp/buildpacks/588c1402935aa679c160b49b085f54b1",
+      "cache_key": "ba031dee-c426-4a5a-b34d-9bd25b959f6b_8b683c2237056089dea24a2a4d70606e8a4a67cf",
+      "log_source": ""
+    },
+    {
+      "name": "java_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/88/a4/88a486f0-946c-4aa7-a221-90e816781d3a_483c35cf7cc87e2ebb05b2b49ebd1f3223105ec8?md5=D4nakP-l3Aadoq-t41b_tw&expires=1465495532",
+      "to": "/tmp/buildpacks/69ecaa9a648c654a4a3d32b5ef4b8a0f",
+      "cache_key": "88a486f0-946c-4aa7-a221-90e816781d3a_483c35cf7cc87e2ebb05b2b49ebd1f3223105ec8",
+      "log_source": ""
+    },
+    {
+      "name": "ruby_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/cd/4f/cd4f2c0e-4a16-4366-ac30-b0e9ee1bf75a_f5446238d598246474e97f7aea1e8389b26b6a58?md5=UGCgDzP70R-TvUCSSX4ZDw&expires=1465495532",
+      "to": "/tmp/buildpacks/5aa85ca3055846b01f0aba277f697ee1",
+      "cache_key": "cd4f2c0e-4a16-4366-ac30-b0e9ee1bf75a_f5446238d598246474e97f7aea1e8389b26b6a58",
+      "log_source": ""
+    },
+    {
+      "name": "nodejs_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/22/2b/222bccc3-7924-4e06-9696-d0015ea35bb6_ddfaa3b5c17aba2d9303306fb1fbae9aa2574b74?md5=bvPAGR2f8Xztwjq9e_4lgw&expires=1465495532",
+      "to": "/tmp/buildpacks/34c85bcb69fcac4d7a063e572bdb64bd",
+      "cache_key": "222bccc3-7924-4e06-9696-d0015ea35bb6_ddfaa3b5c17aba2d9303306fb1fbae9aa2574b74",
+      "log_source": ""
+    },
+    {
+      "name": "go_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/88/d8/88d8d58e-9031-45de-b91c-9f5895a9115f_5dc19602391fb2571b217d754dd7652e6c76630f?md5=JSameon7fPsITLBxRhLj1A&expires=1465495532",
+      "to": "/tmp/buildpacks/0524faff499ba4ce40802e55cf8a3595",
+      "cache_key": "88d8d58e-9031-45de-b91c-9f5895a9115f_5dc19602391fb2571b217d754dd7652e6c76630f",
+      "log_source": ""
+    },
+    {
+      "name": "python_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/b2/8c/b28cce64-88ee-46a0-9b06-a0590834604e_ca60152b78be3f93067cd4f03d01e2db810ac2a8?md5=73inteRQbTz_MqK97SEZSQ&expires=1465495532",
+      "to": "/tmp/buildpacks/ea05fe10834adba9e82355932776ef8a",
+      "cache_key": "b28cce64-88ee-46a0-9b06-a0590834604e_ca60152b78be3f93067cd4f03d01e2db810ac2a8",
+      "log_source": ""
+    },
+    {
+      "name": "php_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/e0/8c/e08c45d3-e81f-46a7-b5f1-ee2b9b08f4b4_de0d8945a76c3b1206e16509e8a03e50437a5a68?md5=qmFS935BVPJIrefVfPuClw&expires=1465495532",
+      "to": "/tmp/buildpacks/5fe273d8465d59fd255d689f30c72168",
+      "cache_key": "e08c45d3-e81f-46a7-b5f1-ee2b9b08f4b4_de0d8945a76c3b1206e16509e8a03e50437a5a68",
+      "log_source": ""
+    },
+    {
+      "name": "binary_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/c1/3e/c13e759a-c480-48fd-991a-bdd76ef6be83_a32d9ae40371d557c7c90eb2affc3d7bba6abe69?md5=znmQvXleFTpS5FR8HGWbPg&expires=1465495532",
+      "to": "/tmp/buildpacks/5b575531eee808782c1ba318cc11dcdf",
+      "cache_key": "c13e759a-c480-48fd-991a-bdd76ef6be83_a32d9ae40371d557c7c90eb2affc3d7bba6abe69",
+      "log_source": ""
+    },
+    {
+      "name": "cf_iis_buildpack",
+      "from": "https://blobstore/read/cc-buildpacks/71/c5/71c5badc-9cd5-49f5-b0d5-b1beae072a06_9915aef123b0452d8f586152cbc7594564a09888?md5=Ty8StxLo0fp6TBq18X61Uw&expires=1465495532",
+      "to": "/tmp/buildpacks/b053537fd6bb74cf7810ea61fc66d602",
+      "cache_key": "71c5badc-9cd5-49f5-b0d5-b1beae072a06_9915aef123b0452d8f586152cbc7594564a09888",
+      "log_source": ""
+    }
+  ],
+  "legacy_download_user": "vcap",
+  "trusted_system_certificates_path": "/etc/cf-system-certificates"
+}
