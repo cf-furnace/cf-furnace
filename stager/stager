@@ -15,7 +15,14 @@ def connect(uri)
   http
 end
 
-def download(dl)
+def download(dl, prefix="")
+  prefix = "" if prefix.nil?
+  dir = prefix + dl['to']
+  if Dir.exists?(dir)
+    puts "======> #{dir} already cached"
+    return
+  end
+
   puts "======> Downloading #{dl['to']} from #{dl['from']}"
   temp = Tempfile.new('temp')
   File.open(temp.path, "wb") do |file|
@@ -24,11 +31,11 @@ def download(dl)
     response.value
   end
 
-  FileUtils.mkdir_p(dl['to'])
+  FileUtils.mkdir_p(dir)
   if dl['from'].end_with? ".tgz"
-    %x"tar xfz #{temp.path} -C #{dl['to']}"
+    %x"tar xfz #{temp.path} -C #{dir}"
   else
-    %x"unzip -q -d #{dl['to']} #{temp.path}"
+    %x"unzip -q -d #{dir} #{temp.path}"
   end
 end
 
@@ -50,11 +57,12 @@ begin
 
   actions = task['action']['timeout']['action']['serial']['actions']
 
+  # Download buildpack_app_lifecycle and buildpacks
+  task['cached_dependencies'].each { |dl| download(dl, ARGV[0]) }
+  exit if ARGV.count > 0
+
   # Download app package
   download(actions[0]['download'])
-
-  # Download buildpack_app_lifecycle and buildpacks
-  task['cached_dependencies'].each { |dl| download(dl) }
 
   # XXX Download artifacts cache
 

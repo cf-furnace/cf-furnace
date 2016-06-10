@@ -3,5 +3,5 @@
 grep taskDefinition ~/.run/log/diego-cc-bridge/stager/stager.stdout.log | \
     tail -1 | \
     jq .data.taskDefinition | \
-    docker run -i --rm --net=hcf stager
+    docker run -i --rm --user vcap --net=hcf stager
 
