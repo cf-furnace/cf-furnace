@@ -70,7 +70,7 @@ begin
   run = actions[1]['emit_progress']['action']['run']
   run['env'].each { |e| ENV[e['name']] = e['value'] }
   # XXX We should stream the output of the builder and not wait until it is done
-  puts %x"#{run['path']} #{run['args'].join(' ')} "
+  puts %x"#{run['path']} #{run['args'].join(' ')}"
   puts "Exit status #{$?.exitstatus}"
   exit if $?.exitstatus > 0
 

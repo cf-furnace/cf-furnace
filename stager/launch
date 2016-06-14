@@ -19,4 +19,4 @@ end
 args += ["-p", "8080:8080"]
 
 puts "Launching #{app_name}"
-system("docker", "run", "-d", *args, "--user", "vcap", "--net", "hcf", "--name", app_name, "#{app_name}:latest")
+system("docker", "run", "-d", *args, "--user", "vcap", "--net", "hcf", "--name", app_name, "#{app_name}:latest", run['path'], *run['args'])
