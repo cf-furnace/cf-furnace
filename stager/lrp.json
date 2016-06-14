@@ -1,0 +1,293 @@
+{
+  "process_guid": "600de972-c322-4a27-8d91-47dc3d42e133-b2e46d4d-0d03-4615-98ef-4ba6214c86c7",
+  "domain": "cf-apps",
+  "rootfs": "preloaded:cflinuxfs2",
+  "instances": 1,
+  "env": [
+    {
+      "name": "LANG",
+      "value": "en_US.UTF-8"
+    }
+  ],
+  "setup": {
+    "serial": {
+      "actions": [
+        {
+          "download": {
+            "from": "http://api:9022/internal/v2/droplets/600de972-c322-4a27-8d91-47dc3d42e133/29b2d87cbc0ebaff332f95994afce9d891bd05c3/download",
+            "to": ".",
+            "cache_key": "droplets-600de972-c322-4a27-8d91-47dc3d42e133-b2e46d4d-0d03-4615-98ef-4ba6214c86c7",
+            "user": "vcap"
+          }
+        }
+      ]
+    }
+  },
+  "action": {
+    "codependent": {
+      "actions": [
+        {
+          "run": {
+            "path": "/tmp/lifecycle/launcher",
+            "args": [
+              "app",
+              "node server.js",
+              ""
+            ],
+            "env": [
+              {
+                "name": "http_proxy",
+                "value": ""
+              },
+              {
+                "name": "HTTP_PROXY",
+                "value": ""
+              },
+              {
+                "name": "https_proxy",
+                "value": ""
+              },
+              {
+                "name": "HTTPS_PROXY",
+                "value": ""
+              },
+              {
+                "name": "no_proxy",
+                "value": ".hcf,127.0.0.1"
+              },
+              {
+                "name": "NO_PROXY",
+                "value": ".hcf,127.0.0.1"
+              },
+              {
+                "name": "VCAP_APPLICATION",
+                "value": "{\"limits\":{\"fds\":16384,\"mem\":1024,\"disk\":1024},\"application_name\":\"node-env\",\"application_uris\":[\"node-env.192.168.77.77.nip.io\"],\"name\":\"node-env\",\"space_name\":\"myspace\",\"space_id\":\"f19bc9f7-4f15-4946-adde-d5dc529168a8\",\"uris\":[\"node-env.192.168.77.77.nip.io\"],\"version\":\"b2e46d4d-0d03-4615-98ef-4ba6214c86c7\",\"application_version\":\"b2e46d4d-0d03-4615-98ef-4ba6214c86c7\",\"application_id\":\"600de972-c322-4a27-8d91-47dc3d42e133\"}"
+              },
+              {
+                "name": "MEMORY_LIMIT",
+                "value": "1024m"
+              },
+              {
+                "name": "VCAP_SERVICES",
+                "value": "{}"
+              },
+              {
+                "name": "foo",
+                "value": "bar"
+              },
+              {
+                "name": "PORT",
+                "value": "8080"
+              }
+            ],
+            "resource_limits": {
+              "nofile": 16384
+            },
+            "user": "vcap",
+            "log_source": "APP",
+            "suppress_log_output": false
+          }
+        },
+        {
+          "run": {
+            "path": "/tmp/lifecycle/diego-sshd",
+            "args": [
+              "-address=0.0.0.0:2222",
+              "-hostKey=-----BEGIN RSA PRIVATE KEY-----\nMIICXQIBAAKBgQDLJxWn0/DQY6VFx34isvI12BT0hPJ579k5EfmpVmUF4AMCNZPh\nkSxppsOt68bPUcySw6A2UeGIpPyf5l8knsb7SVUqy2YeWbwpMVPqiDpfVSd6EZZn\nCsk29FMAiFiimGPdhbDroArhXqEtlbaYo0TvY1tLBvP5G6WCTOg0FVysgwIDAQAB\nAoGBAL6sPXgaxXBhxjJ7LhlVSV5eJDToP0lRY9lb1K8qRoFAIrLFJLpW7o9vFUQ9\nAol9pfuuHsY9DeiZqf5OU8hkOi7dQoEWYCh2DmYMN5GtzAt1Epb1Iq3rl1hozWQZ\nBM/GFXwy7fKLoTLKCvFxbZyctY0J/u/iAUh5jv43OmRZFUYJAkEA1af0DdPAiFXX\ngep0XjG7eTRHlb4FQ+SusxQ7wMCqQKuZrFmeojL6bJAcGfkNh+4awYRV68LhSxvG\nCeQ8NwPy9wJBAPNqO0Chu5Rd24tOJuM6rmJPqkvk0k3ZH+VLQCCIbBjJiiuP4zYe\n/kSCkHS3B6hIsZ2/qO2F5J24RSLSLXNSY9UCQQCl59dhbU6SD2ZbIX3fLusOwQPd\nSUK5Z7goosuLb5BEy3t3E9hUxxUie/z2Rii1prTsFCDMA/YB5r0vLSV86vodAkA7\n8V40FWAHMnHdRVqoPIwzI6ExXWE40I5dPgHFwTK1i/QdtCpk6o79OhXu2B/nnjc3\nPLqR+5YIDRfhclbE/nYdAkBtmPE33859um8Rqc4HqaM0IY8RLDtF+IKxqsMPIPSY\nb4HTZJy7iQycG/m5qsArqK0MT++tZx+ajL3OiG2tvT0d\n-----END RSA PRIVATE KEY-----\n",
+              "-authorizedKey=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDXr8duAt6ZU7ILtKBYy0LEZyv+ir+TGY4Qee/y5QIZ+LJjOhPXD152iVTtG/LDyeyK1BMxK8Ju2H0vKQDh0l+q9c2ahG1YijgijCysjT2z9nMnw4d4dPeLSKqfxVnERVWp5X62L0uBuLq36k/VirfzKAUuADe++x09PtXZjtOd1w==\n",
+              "-inheritDaemonEnv",
+              "-logLevel=fatal"
+            ],
+            "env": [
+              {
+                "name": "http_proxy",
+                "value": ""
+              },
+              {
+                "name": "HTTP_PROXY",
+                "value": ""
+              },
+              {
+                "name": "https_proxy",
+                "value": ""
+              },
+              {
+                "name": "HTTPS_PROXY",
+                "value": ""
+              },
+              {
+                "name": "no_proxy",
+                "value": ".hcf,127.0.0.1"
+              },
+              {
+                "name": "NO_PROXY",
+                "value": ".hcf,127.0.0.1"
+              },
+              {
+                "name": "VCAP_APPLICATION",
+                "value": "{\"limits\":{\"fds\":16384,\"mem\":1024,\"disk\":1024},\"application_name\":\"node-env\",\"application_uris\":[\"node-env.192.168.77.77.nip.io\"],\"name\":\"node-env\",\"space_name\":\"myspace\",\"space_id\":\"f19bc9f7-4f15-4946-adde-d5dc529168a8\",\"uris\":[\"node-env.192.168.77.77.nip.io\"],\"version\":\"b2e46d4d-0d03-4615-98ef-4ba6214c86c7\",\"application_version\":\"b2e46d4d-0d03-4615-98ef-4ba6214c86c7\",\"application_id\":\"600de972-c322-4a27-8d91-47dc3d42e133\"}"
+              },
+              {
+                "name": "MEMORY_LIMIT",
+                "value": "1024m"
+              },
+              {
+                "name": "VCAP_SERVICES",
+                "value": "{}"
+              },
+              {
+                "name": "foo",
+                "value": "bar"
+              },
+              {
+                "name": "PORT",
+                "value": "8080"
+              }
+            ],
+            "resource_limits": {
+              "nofile": 16384
+            },
+            "user": "vcap",
+            "suppress_log_output": false
+          }
+        }
+      ]
+    }
+  },
+  "start_timeout": 60,
+  "monitor": {
+    "timeout": {
+      "action": {
+        "parallel": {
+          "actions": [
+            {
+              "run": {
+                "path": "/tmp/lifecycle/healthcheck",
+                "args": [
+                  "-port=8080"
+                ],
+                "resource_limits": {
+                  "nofile": 1024
+                },
+                "user": "vcap",
+                "log_source": "HEALTH",
+                "suppress_log_output": true
+              }
+            }
+          ]
+        }
+      },
+      "timeout": 30000000000
+    }
+  },
+  "disk_mb": 1024,
+  "memory_mb": 1024,
+  "cpu_weight": 10,
+  "privileged": true,
+  "ports": [
+    8080,
+    2222
+  ],
+  "routes": {
+    "cf-router": [
+      {
+        "hostnames": [
+          "node-env.192.168.77.77.nip.io"
+        ],
+        "port": 8080
+      }
+    ],
+    "diego-ssh": {
+      "container_port": 2222,
+      "host_fingerprint": "bf:65:ca:e3:ed:c7:aa:50:70:ab:d1:f2:d6:25:96:d5",
+      "private_key": "-----BEGIN RSA PRIVATE KEY-----\nMIICXQIBAAKBgQDXr8duAt6ZU7ILtKBYy0LEZyv+ir+TGY4Qee/y5QIZ+LJjOhPX\nD152iVTtG/LDyeyK1BMxK8Ju2H0vKQDh0l+q9c2ahG1YijgijCysjT2z9nMnw4d4\ndPeLSKqfxVnERVWp5X62L0uBuLq36k/VirfzKAUuADe++x09PtXZjtOd1wIDAQAB\nAoGBAJXVF651sdtDyCDXlrh4Y2Z64ZYPHux6STVq7+SFcENIf+vskZHJrG6eEnAx\nBSE76eW7U6XJ52UHYVdcna9CbI/YnUbBxDrA5FQYp5KKUJeeegwwKQMGhTIQxc+C\ncCJBLgwl2DpmKW9gFz8FFhySo1qF0lf3CYmJHtNjMbqQtFlJAkEA2l59it0XLpdE\napTkgDcp3Ql/Bgy4w0LQ5fSTzn4jZVzCDxgogusfx3YAVk6chT9GIE3e0eKnvTVX\ngnNeugFxPQJBAPza8x9SgAxpHBdwhqODnmAkI0a1ZWKccFpVX7fQfxzHMjVZXbN2\nY1y0TM5ZQkivGEE9j31Q/QYFptNCMCTK1KMCQFZ98q/b3mC/3YNxsgfu0ZARQNS+\nmTgN8PwEIb86Sv7M/LhJ01H3m0C/xmZpAKnuY/JLpaPwaIwS4rRyyeRWyekCQQCm\nTN5/6EO9ZdgK9oAmxOcB9mKZG669p4QhdWsJuwAPDlfQTKFa6e85xn+Ja50zrq02\nI2XfFsgDEO6CnVKKsDgfAkBnKk07BF2haUrzAYk8BmJT9Bu0IzqSWba6Po3fDpxg\nzutfsOTyZGySOz/b2W/c7jxJNGvjv/BNPiQdZOHYfR5M\n-----END RSA PRIVATE KEY-----\n"
+    },
+    "tcp-router": []
+  },
+  "log_source": "CELL",
+  "log_guid": "600de972-c322-4a27-8d91-47dc3d42e133",
+  "metrics_guid": "600de972-c322-4a27-8d91-47dc3d42e133",
+  "annotation": "1465861490.3821437",
+  "egress_rules": [
+    {
+      "protocol": "all",
+      "destinations": [
+        "0.0.0.0-9.255.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "11.0.0.0-169.253.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "169.255.0.0-172.15.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "172.32.0.0-192.167.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "192.169.0.0-255.255.255.255"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "all",
+      "destinations": [
+        "172.20.10.0/24"
+      ],
+      "log": false
+    },
+    {
+      "protocol": "tcp",
+      "destinations": [
+        "0.0.0.0/0"
+      ],
+      "ports": [
+        53
+      ],
+      "log": false
+    },
+    {
+      "protocol": "udp",
+      "destinations": [
+        "0.0.0.0/0"
+      ],
+      "ports": [
+        53
+      ],
+      "log": false
+    }
+  ],
+  "cached_dependencies": [
+    {
+      "name": "",
+      "from": "http://diego-access:8080/v1/static/buildpack_app_lifecycle/buildpack_app_lifecycle.tgz",
+      "to": "/tmp/lifecycle",
+      "cache_key": "buildpack-cflinuxfs2-lifecycle",
+      "log_source": ""
+    }
+  ],
+  "legacy_download_user": "vcap",
+  "trusted_system_certificates_path": "/etc/cf-system-certificates",
+  "network": {
+    "properties": {
+      "app_id": "600de972-c322-4a27-8d91-47dc3d42e133",
+      "org_id": "d7e009a7-5002-48e0-9609-af8a1ce1d8ee",
+      "space_id": "f19bc9f7-4f15-4946-adde-d5dc529168a8"
+    }
+  }
+}

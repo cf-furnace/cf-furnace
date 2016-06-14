@@ -1,4 +1,22 @@
-#!/bin/bash
+#!/usr/bin/ruby
 
-APP_NAME=node-env
-docker run -d --name $APP_NAME -p 8080:8080 -e PORT=8080 --user vcap $APP_NAME:latest
+require 'json'
+
+lrp = JSON.parse(%x"grep desiredLRP ~/.run/log/diego-cc-bridge/nsync/nsync_listener.stdout.log | tail -1 | jq .data.desiredLRP")
+
+run = lrp['action']['codependent']['actions'][0]['run']
+
+app_name = "app"
+args = []
+run['env'].each do |e|
+  args += ["-e", "#{e['name']}=#{e['value']}"]
+  next unless e['name'] == "VCAP_APPLICATION"
+  vcap_app = JSON.parse(e['value'])
+  app_name = vcap_app['application_name']
+end
+
+# lrp['ports'].each { |p| args += ["-p", "#{p}:#{p}"] }
+args += ["-p", "8080:8080"]
+
+puts "Launching #{app_name}"
+system("docker", "run", "-d", *args, "--user", "vcap", "--net", "hcf", "--name", app_name, "#{app_name}:latest")
