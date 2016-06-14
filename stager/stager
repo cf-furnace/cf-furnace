@@ -75,13 +75,28 @@ begin
   exit if $?.exitstatus > 0
 
   # Upload droplet
-  upload(actions[2]['emit_progress']['action']['parallel']['actions'][0]['upload'])
+  droplet = actions[2]['emit_progress']['action']['parallel']['actions'][0]['upload']
+  upload(droplet)
 
   # XXX Upload artifacts cache
+
+  # Extract app name from VCAP_APPLICATION
+  app_name = "app"
+  run['env'].each do |e|
+    next unless e['name'] == "VCAP_APPLICATION"
+    vcap_app = JSON.parse(e['value'])
+    app_name = vcap_app['application_name']
+  end
+
+  puts "Building docker image"
+  %x"mkdir /tmp/docker/droplet"
+  %x"tar xfz #{droplet['from']} -C /tmp/docker/droplet"
+  %x"cp -p /tmp/lifecycle/launcher /tmp/docker"
+  puts %x"cd /tmp/docker && docker build -t #{app_name} ."
+
 rescue
   puts "Something went wrong: #{$!}"
   puts $!.backtrace
 end
 
 puts "--- The End ---"
-

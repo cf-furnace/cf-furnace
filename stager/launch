@@ -1,0 +1,4 @@
+#!/bin/bash
+
+APP_NAME=node-env
+docker run -d --name $APP_NAME -p 8080:8080 -e PORT=8080 --user vcap $APP_NAME:latest
