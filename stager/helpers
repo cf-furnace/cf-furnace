@@ -9,12 +9,17 @@ set_deployment() {
     bosh deployment /tmp/$1.yml
 }
 
+# Get rid of annoying "Object#timeout is deprecated, use Timeout.timeout instead" warnings from net-ssh-2.9.1
+
+bosh_ssh() { bosh ssh "$@" 2> /dev/null; }
+bosh_scp() { bosh scp "$@" 2> /dev/null; }
+
 # Return log file of a cc-bridge component
 # Filter on a unique field name; return only the JSON data for the last instance of that field
 
 cc_bridge_log() {
     set_deployment cf-warden-diego > /dev/null
-    bosh ssh cc_bridge_z1/0 grep $1 /var/vcap/sys/log/$2.stdout.log 2>/dev/null | grep "^{" | tail -1 | jq .data.$1
+    bosh_ssh cc_bridge_z1/0 grep $1 /var/vcap/sys/log/$2.stdout.log | grep "^{" | tail -1 | jq .data.$1
 }
 
 # Return the last staging request
@@ -52,7 +57,7 @@ vcap_docker() {
 
 cf_docker() {
     set_deployment kubernetes > /dev/null
-    bosh ssh kube-node/0 -- $(vcap_docker) "$@"
+    bosh_ssh kube-node/0 -- $(vcap_docker) "$@"
 }
 
 # Build stager docker image; see separate ./build script and ./Dockerfile
@@ -61,11 +66,11 @@ cf_docker() {
 rebuild() {
     set_deployment kubernetes > /dev/null
     tar cfz /tmp/stager.tgz Dockerfile stager launcher.dockerfile
-    bosh ssh kube-node/0 "sudo rm /tmp/{build,stager.tgz}"
-    bosh scp kube-node/0 --upload /tmp/stager.tgz /tmp/stager.tgz
-    bosh scp kube-node/0 --upload build /tmp/build
-    bosh ssh kube-node/0 "sudo chmod a+rw /var/vcap/sys/run/docker/docker.sock"
-    bosh ssh kube-node/0 "/tmp/build"
+    bosh_ssh kube-node/0 "sudo rm /tmp/{build,stager.tgz}"
+    bosh_scp kube-node/0 --upload /tmp/stager.tgz /tmp/stager.tgz
+    bosh_scp kube-node/0 --upload build /tmp/build
+    bosh_ssh kube-node/0 "sudo chmod a+rw /var/vcap/sys/run/docker/docker.sock"
+    bosh_ssh kube-node/0 "/tmp/build"
 }
 
 # Prepare for running the stager image; shared code for `restage` and `cache_update` commands
@@ -74,9 +79,9 @@ rebuild() {
 prepare_restaging() {
     build_req > /tmp/build_req.json
     set_deployment kubernetes > /dev/null
-    bosh ssh kube-node/0 "sudo rm /tmp/build_req.json"
-    bosh scp kube-node/0 --upload /tmp/build_req.json /tmp/build_req.json
-    bosh ssh kube-node/0 "perl -MSocket -i -pe 's#[-a-z.]+\.cf.internal#inet_ntoa(inet_aton($&))#ge' /tmp/build_req.json"
+    bosh_ssh kube-node/0 "sudo rm /tmp/build_req.json"
+    bosh_scp kube-node/0 --upload /tmp/build_req.json /tmp/build_req.json
+    bosh_ssh kube-node/0 "perl -MSocket -i -pe 's#[-a-z.]+\.cf.internal#inet_ntoa(inet_aton($&))#ge' /tmp/build_req.json"
 }
 
 # Command to run stager image. Bind-mounts the docker socket to run `docker build .` on kube-node/0
@@ -90,15 +95,15 @@ run_stager() {
 
 restage() {
     prepare_restaging
-    bosh ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) stager"
+    bosh_ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) stager"
 }
 
-# Fetch all cached dependencies from last staging request and recreates the stages with the cache preloaded
+# Fetch all cached dependencies from last staging request and recreates the stager with the cache preloaded
 # Should be run after staging an app with buildpack auto-detect to get *all* admin buildpacks
 
 cache_update() {
     prepare_restaging
-    bosh ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) -v /tmp/stager/cache:/cache stager /stager cache"
+    bosh_ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) -v /tmp/stager/cache:/cache stager /stager cache"
     cf_docker build -t stager /tmp/stager
 }
 
@@ -106,7 +111,7 @@ cache_update() {
 
 kube_node_ip() {
     set_deployment kubernetes > /dev/null
-    bosh instances 2> /dev/null | grep kube-node/0 | perl -ne 'print $1 if /(\d+\.\d+\.\d+\.\d+)/'
+    bosh instances 2> /dev/null | perl -ne 'print $1 if m#kube-node/0.* (\d+\.\d+\.\d+\.\d+)#'
 }
 
 # Launch the last staged app as a docker app on kube-node/0
