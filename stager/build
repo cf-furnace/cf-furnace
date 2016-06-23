@@ -1,3 +1,20 @@
 #!/bin/bash
+set +x
+BUILD_DIR=/tmp/stager
 
-docker build -t stager .
+sudo rm -rf $BUILD_DIR
+mkdir -p $BUILD_DIR/cache
+chmod 777 $BUILD_DIR/cache
+tar xvfz /tmp/stager.tgz -C $BUILD_DIR
+cp /var/vcap/packages/docker/bin/docker $BUILD_DIR
+
+docker() {
+    /var/vcap/packages/docker/bin/docker -H unix:///var/vcap/sys/run/docker/docker.sock "$@"
+}
+
+# Run a local registry for testing
+if ! docker ps | grep -q registry:2; then
+    docker run -d -p 5000:5000 --restart=always --name registry registry:2
+fi
+
+docker build -t stager $BUILD_DIR

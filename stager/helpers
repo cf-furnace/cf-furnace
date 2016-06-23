@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# Switch bosh deployment because `bosh ssh` can only target nodes of the current deployment
+
+set_deployment() {
+    if [ ! -f /tmp/$1.yml ]; then
+        bosh download manifest $1 /tmp/$1.yml
+    fi
+    bosh deployment /tmp/$1.yml
+}
+
+# Return log file of a cc-bridge component
+# Filter on a unique field name; return only the JSON data for the last instance of that field
+
+cc_bridge_log() {
+    set_deployment cf-warden-diego > /dev/null
+    bosh ssh cc_bridge_z1/0 grep $1 /var/vcap/sys/log/$2.stdout.log 2>/dev/null | grep "^{" | tail -1 | jq .data.$1
+}
+
+# Return the last staging request
+
+build_req() {
+    cc_bridge_log taskDefinition stager/stager
+}
+
+# Extract staging command from last staging request
+
+build_cmd() {
+    build_req | jq .action.timeout.action.serial.actions[1].emit_progress.action.run
+}
+
+# Return the last app launch request
+
+launch_req() {
+    cc_bridge_log desiredLRP nsync/nsync_listener
+}
+
+# Extract launch command from last request
+
+launch_cmd() {
+    launch_req | jq .action.codependent.actions[0].run
+}
+
+# The command to run docker inside the kube-node container
+# No need for sudo; the socket has been made world-accessible
+
+vcap_docker() {
+    echo "/var/vcap/packages/docker/bin/docker -H unix:///var/vcap/sys/run/docker/docker.sock"
+}
+
+# Small wrapper to run docker commands inside kube-node/0, e.g. `cf_docker info`
+
+cf_docker() {
+    set_deployment kubernetes > /dev/null
+    bosh ssh kube-node/0 -- $(vcap_docker) "$@"
+}
+
+# Build stager docker image; see separate ./build script and ./Dockerfile
+# Also deploys a local registry on kube-node/0, so the stager can push an app image
+
+rebuild() {
+    set_deployment kubernetes > /dev/null
+    tar cfz /tmp/stager.tgz Dockerfile stager launcher.dockerfile
+    bosh ssh kube-node/0 "sudo rm /tmp/{build,stager.tgz}"
+    bosh scp kube-node/0 --upload /tmp/stager.tgz /tmp/stager.tgz
+    bosh scp kube-node/0 --upload build /tmp/build
+    bosh ssh kube-node/0 "sudo chmod a+rw /var/vcap/sys/run/docker/docker.sock"
+    bosh ssh kube-node/0 "/tmp/build"
+}
+
+# Prepare for running the stager image; shared code for `restage` and `cache_update` commands
+# Upload build request and resolve all *.cf.internal URLs inside the JSON because the stager doesn't have Consul
+
+prepare_restaging() {
+    build_req > /tmp/build_req.json
+    set_deployment kubernetes > /dev/null
+    bosh ssh kube-node/0 "sudo rm /tmp/build_req.json"
+    bosh scp kube-node/0 --upload /tmp/build_req.json /tmp/build_req.json
+    bosh ssh kube-node/0 "perl -MSocket -i -pe 's#[-a-z.]+\.cf.internal#inet_ntoa(inet_aton($&))#ge' /tmp/build_req.json"
+}
+
+# Command to run stager image. Bind-mounts the docker socket to run `docker build .` on kube-node/0
+# Passes in REGISTRY as the destination for generated app images (in addition to droplet uploads)
+
+run_stager() {
+    echo "$(vcap_docker) run -i --rm --user vcap -e REGISTRY=localhost:5000 -v /var/vcap/sys/run/docker/docker.sock:/var/run/docker.sock"
+}
+
+# Restage the last regular staging request via the stager image
+
+restage() {
+    prepare_restaging
+    bosh ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) stager"
+}
+
+# Fetch all cached dependencies from last staging request and recreates the stages with the cache preloaded
+# Should be run after staging an app with buildpack auto-detect to get *all* admin buildpacks
+
+cache_update() {
+    prepare_restaging
+    bosh ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) -v /tmp/stager/cache:/cache stager /stager cache"
+    bosh ssh kube-node/0 "$(vcap_docker) build -t stager /tmp/stager"
+}
+
+# Return IP address of kube-node/0
+
+kube_node_ip() {
+    set_deployment kubernetes > /dev/null
+    bosh instances 2> /dev/null | grep kube-node/0 | perl -ne 'print $1 if /(\d+\.\d+\.\d+\.\d+)/'
+}
+
+# Launch the last staged app as a docker app on kube-node/0
+# Assumes that it has been successfully `rebuild` before
+# Always uses port 8080; will kill any previously launched app
+# Uses the docker image that already exists locally; doesn't use the registry
+# Opens the app in the local browser (assumes OS X)
+
+launch() {
+    launch_req > /tmp/launch_req.json
+    set_deployment kubernetes > /dev/null
+    bosh ssh kube-node/0 "$(vcap_docker) rm -f \$($(vcap_docker) ps -q --filter label=app)"
+    bosh ssh kube-node/0 "$(vcap_docker) $(./launch < /tmp/launch_req.json)"
+    open http://$(kube_node_ip):8080
+}
+
+# Launch the last staged app locally using Docker for Mac
+# Fetches the image from the registry running on kube-node/0
+# Opens the app in the local browser
+
+launch_local() {
+    launch_req > /tmp/launch_req.json
+    docker rm -f $(docker ps -q --filter label=app) 2> /dev/null
+    eval "docker $(./launch $(kube_node_ip):5000 < /tmp/launch_req.json)"
+    open http://localhost:8080
+}

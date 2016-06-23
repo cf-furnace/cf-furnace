@@ -1,7 +1,0 @@
-#!/bin/bash
-
-grep taskDefinition ~/.run/log/diego-cc-bridge/stager/stager.stdout.log | \
-    tail -1 | \
-    jq .data.taskDefinition | \
-    docker run -i --rm --user vcap --net=hcf -v /var/run/docker.sock:/var/run/docker.sock stager
-

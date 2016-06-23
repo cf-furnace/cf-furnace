@@ -94,6 +94,11 @@ begin
   %x"cp -p /tmp/lifecycle/launcher /tmp/docker"
   puts %x"cd /tmp/docker && docker build -t #{app_name} ."
 
+  unless ENV['REGISTRY'].to_s.empty?
+    puts %x"docker tag #{app_name} #{ENV['REGISTRY']}/#{app_name}"
+    puts %x"docker push #{ENV['REGISTRY']}/#{app_name}"
+  end
+
 rescue
   puts "Something went wrong: #{$!}"
   puts $!.backtrace
