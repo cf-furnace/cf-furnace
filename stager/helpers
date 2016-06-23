@@ -6,7 +6,7 @@ set_deployment() {
     if [ ! -f /tmp/$1.yml ]; then
         bosh download manifest $1 /tmp/$1.yml
     fi
-    bosh deployment /tmp/$1.yml
+    bosh deployment /tmp/$1.yml > /dev/null
 }
 
 # Get rid of annoying "Object#timeout is deprecated, use Timeout.timeout instead" warnings from net-ssh-2.9.1
@@ -18,7 +18,7 @@ bosh_scp() { bosh scp "$@" 2> /dev/null; }
 # Filter on a unique field name; return only the JSON data for the last instance of that field
 
 cc_bridge_log() {
-    set_deployment cf-warden-diego > /dev/null
+    set_deployment cf-warden-diego
     bosh_ssh cc_bridge_z1/0 grep $1 /var/vcap/sys/log/$2.stdout.log | grep "^{" | tail -1 | jq .data.$1
 }
 
@@ -56,7 +56,7 @@ vcap_docker() {
 # Small wrapper to run docker commands inside kube-node/0, e.g. `cf_docker info`
 
 cf_docker() {
-    set_deployment kubernetes > /dev/null
+    set_deployment kubernetes
     bosh_ssh kube-node/0 -- $(vcap_docker) "$@"
 }
 
@@ -64,7 +64,7 @@ cf_docker() {
 # Also deploys a local registry on kube-node/0, so the stager can push an app image
 
 rebuild() {
-    set_deployment kubernetes > /dev/null
+    set_deployment kubernetes
     tar cfz /tmp/stager.tgz Dockerfile stager launcher.dockerfile
     bosh_ssh kube-node/0 "sudo rm /tmp/{build,stager.tgz}"
     bosh_scp kube-node/0 --upload /tmp/stager.tgz /tmp/stager.tgz
@@ -78,7 +78,7 @@ rebuild() {
 
 prepare_restaging() {
     build_req > /tmp/build_req.json
-    set_deployment kubernetes > /dev/null
+    set_deployment kubernetes
     bosh_ssh kube-node/0 "sudo rm /tmp/build_req.json"
     bosh_scp kube-node/0 --upload /tmp/build_req.json /tmp/build_req.json
     bosh_ssh kube-node/0 "perl -MSocket -i -pe 's#[-a-z.]+\.cf.internal#inet_ntoa(inet_aton($&))#ge' /tmp/build_req.json"
@@ -110,7 +110,7 @@ cache_update() {
 # Return IP address of kube-node/0
 
 kube_node_ip() {
-    set_deployment kubernetes > /dev/null
+    set_deployment kubernetes
     bosh instances 2> /dev/null | perl -ne 'print $1 if m#kube-node/0.* (\d+\.\d+\.\d+\.\d+)#'
 }
 
@@ -122,7 +122,7 @@ kube_node_ip() {
 
 launch() {
     launch_req > /tmp/launch_req.json
-    set_deployment kubernetes > /dev/null
+    set_deployment kubernetes
     cf_docker "rm -f \$($(vcap_docker) ps -q --filter label=app)"
     cf_docker "$(./launch < /tmp/launch_req.json)"
     open http://$(kube_node_ip):8080
