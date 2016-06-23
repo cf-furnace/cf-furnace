@@ -99,7 +99,7 @@ restage() {
 cache_update() {
     prepare_restaging
     bosh ssh kube-node/0 "cat /tmp/build_req.json | $(run_stager) -v /tmp/stager/cache:/cache stager /stager cache"
-    bosh ssh kube-node/0 "$(vcap_docker) build -t stager /tmp/stager"
+    cf_docker build -t stager /tmp/stager
 }
 
 # Return IP address of kube-node/0
@@ -118,8 +118,8 @@ kube_node_ip() {
 launch() {
     launch_req > /tmp/launch_req.json
     set_deployment kubernetes > /dev/null
-    bosh ssh kube-node/0 "$(vcap_docker) rm -f \$($(vcap_docker) ps -q --filter label=app)"
-    bosh ssh kube-node/0 "$(vcap_docker) $(./launch < /tmp/launch_req.json)"
+    cf_docker "rm -f \$($(vcap_docker) ps -q --filter label=app)"
+    cf_docker "$(./launch < /tmp/launch_req.json)"
     open http://$(kube_node_ip):8080
 }
 
